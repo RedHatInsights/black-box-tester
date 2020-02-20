@@ -23,6 +23,18 @@ objects:
           kind: DockerImage
           name: 'quay.io/cloudservices/iqe-tests:latest'
 
+objects:
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: black-box-runner-storage
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
@@ -74,6 +86,9 @@ objects:
         - name: black-box-runner-src
           configMap:
             name: black-box-runner
+        - name: black-box-runner-storage
+          persistentVolumeClaim:
+            claimName: black-box-runner-storage
         containers:
         - image: iqe-tests:latest
           imagePullPolicy: Always
@@ -116,6 +131,8 @@ objects:
           volumeMounts:
           - name: black-box-runner-src
             mountPath: /black-box-runner
+          - name: black-box-runner-storage
+            mountPath: /black-box-runner-storage
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler

@@ -4,12 +4,14 @@ import os
 import shlex
 import threading
 import time
+from itertools import cycle
 
 import sh
 from prometheus_client import Counter
 
 import config
 from pod_mgr import PodsNotAvailable
+import tracker
 
 
 log = logging.getLogger("blackbox.runner")
@@ -43,7 +45,9 @@ class Plugin:
         self.duration = DURATION_COUNTER.labels(plugin=self.name)
         self.last_start = 0.0
         self.last_completion = 0.0
-        self._run_id = int(time.time())  # use int of time to ensure an ever-increasing unique number
+        self._run_id = int(
+            time.time()
+        )  # use int of time to ensure an ever-increasing unique number
 
         self.env = os.environ.copy()
         # Pass configuration into IQE via env var (instead of using a settings.local.yaml)
@@ -140,7 +144,20 @@ class IqeRunner(threading.Thread):
         self.stop_event = threading.Event()
         self.proc = None
         self._run_id = run_id
+        self._last_plugin = None
+        self.plugin_cycler = cycle(self.plugins)
         log.info("assigned plugins: %s", [", ".join(p.name for p in self.plugins)])
+
+    @property
+    def last_plugin_name(self):
+        return getattr(self._last_plugin, "name", None)
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "plugins": [plugin.name for plugin in self.plugins],
+            "last_plugin": self.last_plugin_name,
+        }
 
     def reserve_pod(self, plugin):
         ip, pod = self.pod_mgr.reserve_pod()
@@ -178,13 +195,28 @@ class IqeRunner(threading.Thread):
         return passed
 
     def run(self):
+        last_plugin = self.last_plugin_name or tracker.get_last_executed_plugin(self.name)
+        log.info("runner %s last plugin executed: %s", self.name, last_plugin)
+
+        if last_plugin and last_plugin in self.to_dict()["plugins"]:
+            # Make the tests pick up where they left off.
+            # We'll start at the NEXT plugin past the one we last executed
+            while next(self.plugin_cycler).name != last_plugin:
+                continue
+
+        counter = 1
         while not self.stop_event.is_set():
-            self._run_id += 1
-            for plugin in self.plugins:
-                if not plugin.last_completion or self._delay_passed(plugin):
-                    self.run_plugin(plugin)
-                else:
-                    log.debug("[%s|run:%d] skipping due to time delay", plugin.name, self._run_id)
+            if counter == len(self.plugins):
+                self._run_id += 1  # increase run id for each full loop through the plugin list
+
+            plugin = next(self.plugin_cycler)
+            if not plugin.last_completion or self._delay_passed(plugin):
+                self.run_plugin(plugin)
+                self._last_plugin = plugin
+                tracker.set_last_executed_plugin(self.name, plugin.name)
+                counter += 1
+            else:
+                log.debug("[%s|run:%d] skipping due to time delay", plugin.name, self._run_id)
             time.sleep(1)
 
     def stop(self):
