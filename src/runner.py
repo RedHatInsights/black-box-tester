@@ -206,7 +206,7 @@ class IqeRunner(threading.Thread):
 
         counter = 1
         while not self.stop_event.is_set():
-            if counter == len(self.plugins):
+            if counter % len(self.plugins) == 1:
                 self._run_id += 1  # increase run id for each full loop through the plugin list
 
             plugin = next(self.plugin_cycler)
