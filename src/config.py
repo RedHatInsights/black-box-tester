@@ -13,7 +13,7 @@ IQE_PASSWORD = os.getenv("IQE_PASSWORD").strip()
 IQE_ACCT_NO = os.getenv("IQE_ACCOUNT_NUMBER").strip()
 IQE_TESTS_LOCAL_CONF_PATH = os.environ.get("IQE_TESTS_LOCAL_CONF_PATH", _this_dir)
 ENV_FOR_DYNACONF = os.environ.get("ENV_FOR_DYNACONF", "prod")
-MAX_RUNNERS = os.environ.get("MAX_RUNNERS", 1)
+MAX_RUNNERS = int(os.environ.get("MAX_RUNNERS", 5))
 IBUTSU_SERVER = os.environ.get("IBUTSU_SERVER", "https://ibutsu-api.cloud.paas.psi.redhat.com")
 IBUTSU_SOURCE = os.environ.get("IBUTSU_SOURCE", "blackbox")
 
