@@ -204,11 +204,8 @@ class IqeRunner(threading.Thread):
             while next(self.plugin_cycler).name != last_plugin:
                 continue
 
-        counter = 1
+        counter = 0
         while not self.stop_event.is_set():
-            if counter % len(self.plugins) == 1:
-                self._run_id += 1  # increase run id for each full loop through the plugin list
-
             plugin = next(self.plugin_cycler)
             if not plugin.last_completion or self._delay_passed(plugin):
                 self.run_plugin(plugin)
@@ -217,6 +214,9 @@ class IqeRunner(threading.Thread):
                 counter += 1
             else:
                 log.debug("[%s|run:%d] skipping due to time delay", plugin.name, self._run_id)
+
+            if counter % len(self.plugins) == 0:
+                self._run_id += 1  # increase run id for each full loop through the plugin list
             time.sleep(1)
 
     def stop(self):
