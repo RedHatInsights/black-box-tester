@@ -17,7 +17,7 @@ from prometheus_client import start_http_server
 import config
 from pod_mgr import SeleniumPodMgr
 from runner import IqeRunner
-
+from tracker import init_tracker
 
 log = logging.getLogger("blackbox.main")
 RUNNERS = []
@@ -53,6 +53,8 @@ def main():
         if plugin_group:
             runner_name = f"runner-{i}"
             RUNNERS.append(IqeRunner(runner_name, plugin_group, pod_mgr, run_id=initial_run_id))
+
+    init_tracker(config.PLUGINS, RUNNERS)
 
     # Ensure number of selenium pods matches number runners
     switch_to_project(config.NAMESPACE)

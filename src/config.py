@@ -1,6 +1,7 @@
+import logging
 import os
 
-
+log = logging.getLogger("blackbox.config")
 _this_dir = os.path.dirname(os.path.realpath(__file__))
 
 RUN_DELAY = 15  # seconds
