@@ -22,3 +22,9 @@ prod:
       password: "changeme"
       identity:
         account_number: "changeme"
+
+  jira:
+    # These values are overriden via an openshift secret
+    username: "changeme"
+    password: "changeme"
+

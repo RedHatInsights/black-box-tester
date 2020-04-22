@@ -63,6 +63,10 @@ class Plugin:
                 "identity": {"account_number": config.IQE_ACCT_NO},
             }
         }
+        jira_opts = {
+            "username": config.JIRA_USERNAME,
+            "password": config.JIRA_PASSWORD,
+        }
         self.env.update(
             {
                 "MERGE_ENABLED_FOR_DYNACONF": "true",
@@ -70,6 +74,7 @@ class Plugin:
                 "IQE_TESTS_LOCAL_CONF_PATH": config.IQE_TESTS_LOCAL_CONF_PATH,
                 "DYNACONF_MAIN": f"@json {json.dumps(main_opts)}",
                 "DYNACONF_USERS": f"@json {json.dumps(users_opts)}",
+                "DYNACONF_JIRA": f"@json {json.dumps(jira_opts)}",
             }
         )
 

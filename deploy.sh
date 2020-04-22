@@ -35,6 +35,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Check if 'jira-creds' secret exists in namespace
+oc get secret jira-creds
+if [ $? -ne 0 ]; then
+    echo "ERROR: No secret named 'jira-creds' -- fix that first"
+    exit 1
+fi
+
 
 # Import the pull secret if it doesn't exist in the namespace
 oc get secret cloudservices-black-box-pull-secret
