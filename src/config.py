@@ -27,7 +27,7 @@ else:
     PLUGINS = [
         # (Plugin name, pytest marker)
         ("akamai", None),
-        ("advisor", "prod_status"),
+        #("advisor", "prod_status"),
         ("platform_ui", "prod_status"),
         ("approval", "prod_status"),
         ("sources", "prod_status"),
