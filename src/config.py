@@ -35,7 +35,7 @@ else:
         ("clientv3", "prod_status"),
         ("compliance", "prod_status"),
         ("drift", "prod_status"),
-        ("hccm", "prod_status"),
+        ("cost_management", "prod_status"),
         ("host_inventory", "prod_status"),
         ("rbac", "prod_status"),
         ("upload", "prod_status"),
